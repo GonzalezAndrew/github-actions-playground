@@ -1,0 +1,21 @@
+name: Demonstrate GitHub Actions on Monorepo 
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'service_1/**'
+
+defaults:
+  run:
+    working-directory: service_1 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Job for service 1
+        run: |-
+          echo "This job is for service 1"
+          ls -lh
