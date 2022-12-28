@@ -3,22 +3,9 @@ Run tests for multiple Python versions concurrently.
 """
 
 import sys
+
 import anyio
 import dagger
-
-from pathlib import Path
-
-def find_repo_path(path: str = __file__) -> str:
-    """Find the root path of the repository and return it.
-    :param path: The path where we should be looking.
-    :return: The root path of the repository.
-    :rtype: str
-    """
-    for path in Path(path).parents:
-        # Check whether "path/.git" exists and is a directory
-        git_dir = path / ".git"
-        if git_dir.is_dir():
-            return path.as_posix()
 
 
 async def test():
@@ -49,14 +36,32 @@ async def test():
 
 
 async def build():
-    repo_path = find_repo_path()
     async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
-        python = client.container().build(client.host().directory(f"{repo_path}/service_1/"))
+        python = client.container().build(client.host().directory(f"./service_1"))
 
         image = await python.publish("ttl.sh/footestdagger:5m")
 
     print(f"Image has been pushed {image}")
 
 
+async def terraform_run():
+    async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
+        terraform_dir = client.host().directory("./terraform")
+
+        terraform_plan = (
+            client.container()
+            .from_("hashicorp/terraform:1.3.1")
+            .with_mounted_directory("/src", terraform_dir)
+            .with_workdir("/src")
+            .exec(["init"])
+            .exec(["plan", "-input=false", "-out=tfplan"])
+            .exec(["show", "-json", "tfplan"])
+        )
+        exit_code = await terraform_plan.exit_code()
+        print(exit_code)
+
+    return terraform_plan.directory("/output")
+
+
 if __name__ == "__main__":
-    anyio.run(build)
+    anyio.run(terraform_run)
