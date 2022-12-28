@@ -6,6 +6,20 @@ import sys
 import anyio
 import dagger
 
+from pathlib import Path
+
+def find_repo_path(path: str = __file__) -> str:
+    """Find the root path of the repository and return it.
+    :param path: The path where we should be looking.
+    :return: The root path of the repository.
+    :rtype: str
+    """
+    for path in Path(path).parents:
+        # Check whether "path/.git" exists and is a directory
+        git_dir = path / ".git"
+        if git_dir.is_dir():
+            return path.as_posix()
+
 
 async def test():
     versions = ["3.7", "3.8", "3.9", "3.10", "3.11"]
@@ -35,8 +49,9 @@ async def test():
 
 
 async def build():
+    repo_path = find_repo_path()
     async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
-        python = client.container().build(client.host().directory("../../service_1/"))
+        python = client.container().build(client.host().directory(f"{repo_path}/service_1/"))
 
         image = await python.publish("ttl.sh/footestdagger:5m")
 
