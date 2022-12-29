@@ -12,10 +12,10 @@ def __config() -> dict:
     :return: A map of each terraform command with it's arguments.
     :rtype: dict[str, dict[str, list[str]]]
     """
-    tf_state_bucket = os.getenv("TF_STATE_BUCKET", "")
-    tf_dynamo_table = os.getenv("TF_DYNAMO_TABLE", "")
+    tf_state_bucket = os.getenv("TF_STATE_BUCKET", "loa-sandbox-tf-terraform-states")
+    tf_dynamo_table = os.getenv("TF_DYNAMO_TABLE", "loa-sandbox-tf-remote")
     aws_region = os.getenv("AWS_REGION", "us-east-1")
-    deploy = os.getenv("DEPLOY", "")
+    deploy = os.getenv("DEPLOY", "loa-sandbox-use1")
     tf_state_key = os.getenv("TF_STATE_KEY", "")
 
     cmd_config = {
@@ -55,6 +55,9 @@ def __config() -> dict:
 
     return cmd_config
 
+def __validate_init() -> bool:
+    """to be used if there is no .terraform dir"""
+    pass
 
 async def terraform_image(
     client: dagger.Client, mounted_dir: dagger.Directory
@@ -155,6 +158,7 @@ async def main(args: argparse.Namespace) -> int:
             if tf_init_exit_code != 0:
                 raise Exception("Terraform init failed!")
         elif args.plan:
+            __validate_init()
             # run a terraform plan
             tf_plan_exit_code = await plan(
                 base=terraform_base_image, exec=config["plan"]["exec"]

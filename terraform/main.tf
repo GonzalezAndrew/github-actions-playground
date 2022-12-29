@@ -1,12 +1,25 @@
 terraform {
   required_version = ">= 1.1.1"
+  required_providers {
+    docker = {
+      source = "kreuzwerker/docker"
+      version = "~> 2.13.0"
+    }
+  }
 }
 
-variable "image_tag" {
-    default = "1.2.3"
-    type = string
+provider "docker" {}
+
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+  keep_locally = false
 }
 
-output "uptime_url" {
-  value = "Your image was ${var.image_tag}."
+resource "docker_container" "nginx" {
+  image = docker_image.nginx.latest
+  name  = "tutorial"
+  ports {
+    internal = 80
+    external = 8000
+  }
 }
