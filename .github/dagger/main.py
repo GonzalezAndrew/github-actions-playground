@@ -45,9 +45,7 @@ async def terraform_plan(base: dagger.Container) -> int:
     :return: The exit code from the terraform plan.
     :rtype: int
     """
-    terraform_plan = base.exec(
-        ["plan", "-input=false", "-var-file=./inputs.tfvars"]
-    )
+    terraform_plan = base.exec(["plan", "-input=false", "-var-file=./inputs.tfvars"])
 
     plan_exit_code = await terraform_plan.exit_code()
 
@@ -77,11 +75,11 @@ async def main():
     async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
         terraform_dir = client.host().directory("./terraform")
         terraform_base_image = await terraform_image(client, mounted_dir=terraform_dir)
-        
+
         tf_init_exit_code = await terraform_init(base=terraform_base_image)
         if tf_init_exit_code != 0:
             raise Exception("Terraform init failed!")
-        
+
         tf_plan_exit_code = await terraform_plan(base=terraform_base_image)
         if tf_plan_exit_code != 0:
             raise Exception("Terraform plan failed!")
@@ -89,6 +87,7 @@ async def main():
         tf_apply_exit_code = await terraform_apply(base=terraform_base_image)
         if tf_apply_exit_code != 0:
             raise Exception("Terraform apply failed")
-        
+
+
 if __name__ == "__main__":
     anyio.run(main)
