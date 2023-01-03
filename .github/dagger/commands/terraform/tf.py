@@ -12,10 +12,10 @@ def __config() -> dict:
     :return: A map of each terraform command with it's arguments.
     :rtype: dict[str, dict[str, list[str]]]
     """
-    tf_state_bucket = os.getenv("TF_STATE_BUCKET", "loa-sandbox-tf-terraform-states")
-    tf_dynamo_table = os.getenv("TF_DYNAMO_TABLE", "loa-sandbox-tf-remote")
+    tf_state_bucket = os.getenv("TF_STATE_BUCKET", "sandbox-tf-terraform-states")
+    tf_dynamo_table = os.getenv("TF_DYNAMO_TABLE", "sandbox-tf-remote")
     aws_region = os.getenv("AWS_REGION", "us-east-1")
-    deploy = os.getenv("DEPLOY", "loa-sandbox-use1")
+    deploy = os.getenv("DEPLOY", "sandbox-use1")
     tf_state_key = os.getenv("TF_STATE_KEY", "")
 
     cmd_config = {

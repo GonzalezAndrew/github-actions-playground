@@ -17,6 +17,12 @@ RUN : \
     && yum install -y \
         terraform-${tfv} \
         jq \
+        docker \
     && yum clean all \
     && rm -rf /var/cache/yum \
+    && :
+
+RUN : \
+    && mkdir -p /src \
+    && chmod -R 777 /src \
     && :
